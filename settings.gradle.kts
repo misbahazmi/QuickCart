@@ -13,6 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "QuickCart"
+rootProject.name = "QuickCart-Android"
 include(":app")
 include(":chips-view-lib")
