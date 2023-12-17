@@ -7,7 +7,7 @@ import androidx.preference.PreferenceManager
 
 /**
  * @author: Mohammad Misbah
- * @since: 26-Sep-2023
+ * @since:  17-Dec-2023
  * @sample: Technology Assessment for Sr. Android Role
  * Email Id: mohammadmisbahazmi@gmail.com
  * GitHub: https://github.com/misbahazmi
@@ -120,7 +120,6 @@ class PreferenceUtils {
     }
 
     private class Builder(val context: Context, val name: String?, val mode: Int) {
-
         fun build() : PreferenceUtils {
             if (mode == -1 || name == null) {
                 return PreferenceUtils(context)
@@ -128,6 +127,4 @@ class PreferenceUtils {
             return PreferenceUtils(context, name, mode)
         }
     }
-
-
 }

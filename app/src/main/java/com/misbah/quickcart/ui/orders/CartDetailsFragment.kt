@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.Lifecycle
@@ -16,18 +15,21 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.snackbar.Snackbar
-import com.misbah.chips.ChipListener
-import com.misbah.quickcart.R
 import com.misbah.quickcart.core.base.BaseFragment
+import com.misbah.quickcart.core.data.model.CartItem
+import com.misbah.quickcart.core.data.model.Order
+import com.misbah.quickcart.core.data.model.Product
+import com.misbah.quickcart.core.data.storage.PreferenceUtils
 import com.misbah.quickcart.databinding.FragmentCartDetailsBinding
+import com.misbah.quickcart.ui.customs.CartItemLayout
 import com.misbah.quickcart.ui.dialogs.TimePickerFragment
 import com.misbah.quickcart.ui.listeners.OnDateTimeListener
 import com.misbah.quickcart.ui.main.CartViewModel
 import com.misbah.quickcart.ui.main.MainActivity
 import com.misbah.quickcart.ui.utils.exhaustive
-import com.nytimes.utils.AppEnums
+import com.misbah.quickcart.ui.utils.gone
+import com.misbah.quickcart.ui.utils.visible
 import kotlinx.coroutines.launch
-import java.text.DateFormat
 import javax.inject.Inject
 
 /**
@@ -42,6 +44,7 @@ class CartDetailsFragment : BaseFragment<CartDetailsViewModel>(), OnDateTimeList
     private val tasksArgs: CartDetailsFragmentArgs by navArgs()
     private var _binding: FragmentCartDetailsBinding? = null
     internal lateinit var viewModel: CartDetailsViewModel
+
     @Inject
     lateinit var factory: ViewModelProvider.Factory
     private val binding get() = _binding!!
@@ -50,6 +53,7 @@ class CartDetailsFragment : BaseFragment<CartDetailsViewModel>(), OnDateTimeList
         viewModel = ViewModelProvider(viewModelStore, factory)[CartDetailsViewModel::class.java]
         return viewModel
     }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -61,53 +65,50 @@ class CartDetailsFragment : BaseFragment<CartDetailsViewModel>(), OnDateTimeList
         binding.cartViewModel = sharedViewModel
         return binding.root
     }
+
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
-
-            if(viewModel.order.value == null){
-                btnSaveUpdate.text = getString(R.string.save)
-                textHeading.text = getString(R.string.add_tasks)
-                imgHeader.setImageResource(R.drawable.ic_add_task_data)
-            }
-            else {
-                btnSaveUpdate.text = getString(R.string.update)
-                textHeading.text = getString(R.string.update_tasks)
-                imgHeader.setImageResource(R.drawable.ic_edit_task_data)
-            }
-
-            editTextTaskTitle.setText(viewModel.order.value?.carts ?: "")
-            editTextTaskDescription.setText(viewModel.order.value?.carts ?: "")
-            textViewDateDue.text = "Due Date: ${viewModel.order.value?.createdDateFormatted ?: DateFormat.getDateTimeInstance().format(viewModel.dueDate)}"
-            viewModel.taskTitle = viewModel.order.value?.carts ?: ""
-            viewModel.taskDescription = viewModel.order.value?.carts ?: ""
-            viewModel.dueDate = viewModel.order.value?.created ?: System.currentTimeMillis()
-
-            editTextTaskTitle.addTextChangedListener {
-                viewModel.taskTitle = it.toString()
-            }
-            editTextTaskDescription.addTextChangedListener {
-                viewModel.taskDescription = it.toString()
-            }
-            chipTasksPriority.setChipListener( object : ChipListener {
-                override fun chipSelected(index: Int) {
-                    viewModel.taskImportance =  AppEnums.TasksPriority.values().distinct()
-                        .withIndex().first { it.value.value == index }.value.value
+            if (viewModel.order.value != null) {
+                sharedViewModel.shoppingCart.value!!.clearCart()
+                for (data in viewModel.order.value?.getCartList()!!) {
+                    val product = Product(name = data.name, price = data.price)
+                    sharedViewModel.shoppingCart.value!!.addToCart(product, data.quantity)
                 }
-                override fun chipDeselected(index: Int) {}
-                override fun chipRemoved(index: Int) {}
-              }
-            )
-            for ((index,data)  in AppEnums.TasksPriority.values().distinct().withIndex()){
-               chipTasksPriority.addChip(data.name)
             }
-            if(viewModel.order.value?.status != null && viewModel.order.value?.status != 0)
-                viewModel.order.value?.status?.let { chipTasksPriority.setSelectedChip(it) }
-            else
-                chipTasksPriority.setSelectedChip(0)
+            layoutCartItem.removeAllViews()
+            for (data in sharedViewModel.shoppingCart.value!!.getCartItems()) {
+                val layout = CartItemLayout(context)
+                layout.setData(data.key, data.value)
+                val cartItem = CartItem(
+                    productId = data.key.id,
+                    name = data.key.name,
+                    quantity = data.value,
+                    price = data.key.price,
+                    totalPrice = data.value * data.key.price
+                )
+                sharedViewModel.cartList.value?.add(cartItem)
+                layoutCartItem.addView(layout)
+            }
+            val taxStatus =
+                context?.let { PreferenceUtils.with(it).getBoolean("tax_inclusive", false) }!!
+            val order = Order(
+                carts = "",
+                amount = sharedViewModel.shoppingCart.value?.getSubtotal()!!,
+                taxAmount = sharedViewModel.shoppingCart.value?.getTaxAmount()!!,
+                totalAmout = sharedViewModel.shoppingCart.value?.getTotalPrice()!!,
+                taxIncluded = taxStatus
+            )
+            order.carts = order.toCartLisString(sharedViewModel.cartList.value!!)
+            if (tasksArgs.order != null) {
+                layoutPlaceOrder.gone()
+            } else {
+                layoutPlaceOrder.visible()
+            }
+            if (viewModel.order.value == null)
+                viewModel.order.value = order
         }
-
         @Suppress("IMPLICIT_CAST_TO_ANY")
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -116,23 +117,21 @@ class CartDetailsFragment : BaseFragment<CartDetailsViewModel>(), OnDateTimeList
                         is CartDetailsViewModel.AddEditTaskEvent.ShowInvalidInputMessage -> {
                             Snackbar.make(requireView(), event.msg, Snackbar.LENGTH_LONG).show()
                         }
+
                         is CartDetailsViewModel.AddEditTaskEvent.NavigateBackWithResult -> {
-                            binding.editTextTaskTitle.clearFocus()
-                            binding.editTextTaskDescription.clearFocus()
                             setFragmentResult(
                                 "add_edit_request",
                                 bundleOf("add_edit_result" to event.result)
                             )
+                            sharedViewModel.shoppingCart.value?.clearCart()
                             findNavController().popBackStack()
                         }
-                        is CartDetailsViewModel.AddEditTaskEvent.ShowDateTimePicker ->{
-                            TimePickerFragment.newInstance(this@CartDetailsFragment).show(childFragmentManager, "timePicker")
+
+                        is CartDetailsViewModel.AddEditTaskEvent.ShowDateTimePicker -> {
+                            TimePickerFragment.newInstance(this@CartDetailsFragment)
+                                .show(childFragmentManager, "timePicker")
                         }
-                        is CartDetailsViewModel.AddEditTaskEvent.DateTimeWithResult ->{
-                            viewModel.selectedDateTime = event.result
-                            viewModel.dueDate = event.result
-                            binding.textViewDateDue.text = "Due Date: ${DateFormat.getDateTimeInstance().format(viewModel.dueDate)}"
-                        }
+
                         else -> {}
                     }.exhaustive
                 }
@@ -142,11 +141,16 @@ class CartDetailsFragment : BaseFragment<CartDetailsViewModel>(), OnDateTimeList
     }
 
     fun clickOnSave() {
-        viewModel.onSaveClick()
+        viewModel.onPlaceOrderClick()
     }
 
-    fun clickOnDateTime(){
-       viewModel.showDatePicker()
+    override fun onDestroy() {
+        super.onDestroy()
+        sharedViewModel.cartList.value?.clear()
+        if (tasksArgs.order != null) {
+            sharedViewModel.shoppingCart.value?.clearCart()
+        }
+        viewModel.order.value = null
     }
 
     override fun onDateTimeSelected(timestamp: Long) {

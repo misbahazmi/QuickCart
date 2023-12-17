@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:layout_marginStart="12dp"
+    android:layout_marginEnd="12dp"
+    android:focusable="true"
+    android:theme="@style/Theme.MaterialComponents.Light"
+    android:foreground="?android:attr/selectableItemBackground"
+    app:cardElevation="3dp"
+    app:cardBackgroundColor="@android:color/white"
+    app:cardUseCompatPadding="true"
+    app:cardCornerRadius="@dimen/card_corner_radius">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="12dp"
+        android:orientation="vertical"
+        tools:ignore="UseCompoundDrawables">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_width="0dp"
+                android:orientation="vertical"
+                android:layout_weight="1"
+                android:layout_height="wrap_content">
+               <LinearLayout
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content">
+                   <TextView
+                       android:id="@+id/text_product_name"
+                       android:layout_width="0dp"
+                       android:layout_height="wrap_content"
+                       android:ellipsize="end"
+                       android:layout_weight="1"
+                       android:gravity="center_vertical"
+                       android:maxLines="1"
+                       android:textSize="16sp"
+                       android:fontFamily="@font/lato"
+                       android:textColor="@color/text_color_red"
+                       tools:text="Example item" />
+                   <TextView
+                       android:id="@+id/text_total_price"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:ellipsize="end"
+                       android:gravity="center_vertical"
+                       android:maxLines="1"
+                       android:textSize="16sp"
+                       android:fontFamily="@font/lato"
+                       android:textColor="@color/text_color_red"
+                       tools:text="AED 230" />
+               </LinearLayout>
+                <TextView
+                    android:id="@+id/text_quantity_price"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:layout_marginTop="4dp"
+                    android:gravity="center_vertical|end"
+                    android:maxLines="1"
+                    android:fontFamily="@font/lato"
+                    android:textSize="12sp"
+                    android:textColor="@color/black"
+                    tools:text="1 X AED 230" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
+

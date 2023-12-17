@@ -18,6 +18,7 @@ import com.misbah.chips.ChipListener
 import com.misbah.quickcart.core.base.BaseFragment
 import com.misbah.quickcart.core.data.model.Category
 import com.misbah.quickcart.core.data.model.Product
+import com.misbah.quickcart.core.data.storage.PreferenceUtils
 import com.misbah.quickcart.databinding.FragmentCategoryBinding
 import com.misbah.quickcart.databinding.FragmentProductsBinding
 import com.misbah.quickcart.ui.adapters.CategoryAdapter
@@ -27,6 +28,8 @@ import com.misbah.quickcart.ui.main.CartViewModel
 import com.misbah.quickcart.ui.main.MainActivity
 import com.misbah.quickcart.ui.orders.OrderListViewModel
 import com.misbah.quickcart.ui.utils.exhaustive
+import com.misbah.quickcart.ui.utils.gone
+import com.misbah.quickcart.ui.utils.visible
 import com.nytimes.utils.AppEnums
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -92,6 +95,10 @@ class ProductListFragment : BaseFragment<ProductViewModel>(), OnProductClickList
             }
         }
         viewModel.products.observe(viewLifecycleOwner) {
+            if(it.isNotEmpty())
+                binding.textEmpty.gone()
+            else
+                binding.textEmpty.visible()
             productAdapter.submitList(it)
         }
         viewLifecycleOwner.lifecycleScope.launch {
@@ -123,6 +130,10 @@ class ProductListFragment : BaseFragment<ProductViewModel>(), OnProductClickList
                 binding.chipTasksCategory.setSelectedChip(0)
         }
         (requireActivity() as MainActivity).showFAB()
+        (requireActivity() as MainActivity).updateFABAdd()
+        val taxStatus =
+            context?.let { PreferenceUtils.with(it).getBoolean("tax_inclusive", false) }!!
+        sharedViewModel.taxIncluded.value = taxStatus
     }
 
     override fun onDestroyView() {
@@ -143,5 +154,6 @@ class ProductListFragment : BaseFragment<ProductViewModel>(), OnProductClickList
 
     override fun onAddToCartClick(product : Product) {
         sharedViewModel.shoppingCart.value!!.addToCart(product, 1)
+        viewModel.displayMessage("Product Added To Cart")
     }
 }

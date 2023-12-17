@@ -19,6 +19,6 @@ object AppEnums {
     }
 
     enum class ProductCategory(val value: Int) {
-        All(0), Work(1), Personal(2), Wishlist(3), Shopping(4)
+        All(0), New(1), Personal(2), Wishlist(3), Shopping(4)
     }
 }

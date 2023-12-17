@@ -30,4 +30,8 @@ data class Product(
     fun getPriceFormatted(): String {
         return DecimalFormat( "AED #0.00" ,  DecimalFormatSymbols( Locale.ENGLISH)).format( price)
     }
+
+    fun getPriceFormatted(amount  : Double): String {
+        return DecimalFormat( "AED #0.00" ,  DecimalFormatSymbols( Locale.ENGLISH)).format( amount)
+    }
 }

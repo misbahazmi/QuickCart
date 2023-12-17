@@ -8,26 +8,42 @@
     android:layout_height="match_parent"
     tools:context=".ui.orders.OrderListFragment">
 
+    <TextView
+        android:id="@+id/text_empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="36dp"
+        android:fontFamily="@font/lato"
+        android:text="@string/product_empty"
+        app:layout_constraintBottom_toBottomOf="@+id/linearLayout2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <LinearLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
         <HorizontalScrollView
             android:layout_width="wrap_content"
-            android:scrollbars="none"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:scrollbars="none">
+
             <com.misbah.chips.ChipCloudScrollable
                 android:id="@+id/chip_tasks_category"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
-                android:layout_marginStart="16dp"
-                android:paddingEnd="16dp"
-                android:paddingStart="0dp"
                 android:layout_marginBottom="8dp"
-                android:layout_height="wrap_content"
+                android:paddingStart="0dp"
+                android:paddingEnd="16dp"
                 chipcloud:allCaps="false"
                 chipcloud:deselectTransitionMS="500"
                 chipcloud:deselectedColor="@color/white"
@@ -41,6 +57,7 @@
                 chipcloud:textSize="12sp"
                 chipcloud:verticalSpacing="8dp" />
         </HorizontalScrollView>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view_products"
             android:layout_width="match_parent"

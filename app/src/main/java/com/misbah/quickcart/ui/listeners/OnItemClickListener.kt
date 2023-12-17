@@ -13,6 +13,6 @@ import com.misbah.quickcart.core.data.model.Order
 interface OnItemClickListener {
         fun onItemClick(order: Order)
         fun onItemDeleteClick(order: Order)
-        fun onItemEditClick(order: Order)
+        fun onItemViewClick(order: Order)
         fun onCheckBoxClick(order: Order, isChecked: Boolean)
     }

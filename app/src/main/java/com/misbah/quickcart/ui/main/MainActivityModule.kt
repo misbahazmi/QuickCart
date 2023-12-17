@@ -1,5 +1,6 @@
 package com.misbah.quickcart.ui.main
 
+import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import com.misbah.quickcart.core.di.factory.ViewModelFactory
 import dagger.Module
@@ -22,6 +23,7 @@ class MainActivityModule {
     fun providesViewModel() : MainViewModel {
         return MainViewModel()
     }
+
 
     @Provides
     fun provideViewModelProvider(viewModel: MainViewModel) : ViewModelProvider.Factory{

@@ -20,7 +20,7 @@ private const val TAG = "PreferencesManager"
 
 enum class SortOrder {BY_ORDER_NO, BY_DATE}
 
-data class FilterPreferences(val sortOrder: SortOrder, val taxIncluded: Boolean, val category : Int)
+data class FilterPreferences(val sortOrder: SortOrder, val taxIncluded: Boolean, val category : Int, val cartData: String)
 
 class PreferencesManager @Inject constructor(private  val context : Context) {
 
@@ -41,8 +41,8 @@ class PreferencesManager @Inject constructor(private  val context : Context) {
             )
             val taxIncluded = preferences[PreferencesKeys.TAX_INCLUDED] ?: false
             val productCategory = preferences[PreferencesKeys.PRODUCT_CATEGORY] ?: 0
-            val cartData = preferences[PreferencesKeys.CART_DATA] ?: ShoppingCart()
-            FilterPreferences(sortOrder, taxIncluded, productCategory)
+            val cartData = preferences[PreferencesKeys.CART_DATA] ?: ""
+            FilterPreferences(sortOrder, taxIncluded, productCategory, cartData)
         }
     suspend fun updateCartData(cartData: String) {
         context.dataStore.edit { preferences ->

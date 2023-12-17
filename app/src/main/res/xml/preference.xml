@@ -6,7 +6,7 @@
 
         <SwitchPreferenceCompat
             app:key="tax_status"
-            app:title="Tax option to be inclusive"/>
+            app:title="Tax option to be inclusive (5% VAT)"/>
 
     </PreferenceCategory>
     <PreferenceCategory

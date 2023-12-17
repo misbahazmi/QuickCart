@@ -26,7 +26,7 @@
         android:paddingTop="@dimen/nav_header_vertical_spacing"
         android:fontFamily="@font/lato"
         android:textStyle="bold"
-        android:textSize="24sp"
+        android:textSize="22sp"
         android:textColor="@color/black"
         android:text="@string/app_name"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
@@ -37,7 +37,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="@font/lato"
         android:textStyle="normal"
-        android:textSize="14sp"
+        android:textSize="12sp"
         android:textColor="@color/gray_dark"
         android:text="@string/nav_header_subtitle" />
 </LinearLayout>

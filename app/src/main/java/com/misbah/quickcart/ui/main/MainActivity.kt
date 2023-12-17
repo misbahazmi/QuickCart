@@ -15,10 +15,12 @@ import android.view.animation.AnimationUtils
 import android.window.OnBackInvokedDispatcher
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import androidx.core.os.bundleOf
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -59,6 +61,7 @@ class MainActivity : BaseActivity<MainViewModel>() {
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    private val sharedViewModel: CartViewModel by viewModels<CartViewModel>()
     @Inject
     internal lateinit var viewModel: MainViewModel
     override fun getViewModel(): MainViewModel {
@@ -93,7 +96,7 @@ class MainActivity : BaseActivity<MainViewModel>() {
                         is OrderListViewModel.OrdersEvent.NavigateToAddTaskScreen -> {
                             val action =
                                 OrderListFragmentDirections.actionOrdersFragmentToAddEditTaskFragment(
-                                    "New Order",
+                                    "Place New Order",
                                     null
                                 )
                             navController.navigate(action)
@@ -102,7 +105,7 @@ class MainActivity : BaseActivity<MainViewModel>() {
                         is OrderListViewModel.OrdersEvent.NavigateToEditTaskScreen -> {
                             val action =
                                 OrderListFragmentDirections.actionOrdersFragmentToAddEditTaskFragment(
-                                    "Edit Order",
+                                    "View Order Details",
                                     event.order
                                 )
                             navController.navigate(action)
@@ -157,7 +160,11 @@ class MainActivity : BaseActivity<MainViewModel>() {
                     viewModel.onAddNewProductClick()
                 }
                 R.id.ordersFragment -> {
-                    viewModel.onAddNewTaskClick()
+                    if(sharedViewModel.shoppingCart.value?.getCartItems()!!.isEmpty()){
+                        navController.navigate(R.id.nav_product)
+                    } else {
+                        viewModel.onAddNewTaskClick()
+                    }
                 }
                 else -> {}
             }
@@ -183,7 +190,7 @@ class MainActivity : BaseActivity<MainViewModel>() {
         navView.setNavigationItemSelectedListener { menuItem ->
             // close drawer when item is tapped
             drawerLayout.closeDrawers()
-            val bundle = bundleOf("title" to "New Orders", "order" to null)
+            val bundle = bundleOf("title" to "Orders Details", "order" to null)
             when (menuItem.itemId) {
                 R.id.addEditTaskFragment -> {
                     navController.navigate(menuItem.itemId, bundle)
@@ -222,6 +229,22 @@ class MainActivity : BaseActivity<MainViewModel>() {
     fun showFAB(){
         binding.appBarMain.fab.show()
     }
+
+    fun performFABClick(){
+        binding.appBarMain.fab.performClick()
+    }
+
+    fun updateFABCart(){
+        binding.appBarMain.fab.setImageResource(R.drawable.ic_add_shopping_cart)
+    }
+    fun updateFABCartDetails(){
+        binding.appBarMain.fab.setImageResource(R.drawable.ic_cart_details)
+    }
+
+    fun updateFABAdd(){
+        binding.appBarMain.fab.setImageResource(R.drawable.ic_add)
+    }
+
     fun exitOnBackPressed() {
         if (navController.currentDestination?.id == R.id.ordersFragment)
             viewModel.onBackClickQuitApp()

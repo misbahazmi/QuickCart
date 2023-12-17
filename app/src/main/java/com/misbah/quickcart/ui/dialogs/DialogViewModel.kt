@@ -16,6 +16,6 @@ import javax.inject.Inject
  */
 class DialogViewModel @Inject constructor(private val repository: DialogRepository) : ViewModel() {
     fun onConfirmDeleteAllClick() =  CoroutineScope(Dispatchers.IO).launch {
-        repository.deleteAllCompletedTasks()
+
     }
 }

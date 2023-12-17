@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
@@ -23,11 +24,14 @@ import com.misbah.quickcart.core.base.BaseFragment
 import com.misbah.quickcart.core.data.model.Order
 import com.misbah.quickcart.core.data.storage.SortOrder
 import com.misbah.quickcart.databinding.FragmentOrdersBinding
-import com.misbah.quickcart.ui.adapters.TasksAdapter
+import com.misbah.quickcart.ui.adapters.OrdersAdapter
 import com.misbah.quickcart.ui.listeners.OnItemClickListener
+import com.misbah.quickcart.ui.main.CartViewModel
 import com.misbah.quickcart.ui.main.MainActivity
 import com.misbah.quickcart.ui.utils.exhaustive
+import com.misbah.quickcart.ui.utils.gone
 import com.misbah.quickcart.ui.utils.onQueryTextChanged
+import com.misbah.quickcart.ui.utils.visible
 import com.nytimes.utils.AppLog
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -45,6 +49,7 @@ class OrderListFragment :  BaseFragment<OrderListViewModel>(), OnItemClickListen
     private var _binding: FragmentOrdersBinding? = null
     internal lateinit var viewModel: OrderListViewModel
     private lateinit var searchView: SearchView
+    private val sharedViewModel: CartViewModel by activityViewModels()
     @Inject
     lateinit var factory: ViewModelProvider.Factory
     private val binding get() = _binding!!
@@ -64,7 +69,7 @@ class OrderListFragment :  BaseFragment<OrderListViewModel>(), OnItemClickListen
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val taskAdapter = TasksAdapter(this)
+        val taskAdapter = OrdersAdapter(this)
         binding.apply {
             recyclerViewTasks.apply {
                 adapter = taskAdapter
@@ -95,7 +100,11 @@ class OrderListFragment :  BaseFragment<OrderListViewModel>(), OnItemClickListen
             viewModel.onAddEditResult(result)
         }
 
-        viewModel.tasks.observe(viewLifecycleOwner) {
+        viewModel.orders.observe(viewLifecycleOwner) {
+            if(it.isNotEmpty())
+                binding.textEmpty.gone()
+            else
+                binding.textEmpty.visible()
             taskAdapter.submitList(it)
         }
 
@@ -103,12 +112,16 @@ class OrderListFragment :  BaseFragment<OrderListViewModel>(), OnItemClickListen
             AppLog.debugD("SIZE: ${it.size}")
         }
 
+        binding.layoutViewCart.setOnClickListener {
+            (requireActivity() as MainActivity).performFABClick()
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.tasksEvent.collect { event ->
                     when (event) {
                         is OrderListViewModel.OrdersEvent.ShowUndoDeleteTaskMessage -> {
-                            Snackbar.make(requireView(), "Task deleted", Snackbar.LENGTH_LONG)
+                            Snackbar.make(requireView(), "Order deleted", Snackbar.LENGTH_LONG)
                                 .setAction("UNDO") {
                                     viewModel.onUndoDeleteClick(event.order)
                                 }.show()
@@ -119,7 +132,7 @@ class OrderListFragment :  BaseFragment<OrderListViewModel>(), OnItemClickListen
                         is OrderListViewModel.OrdersEvent.NavigateToAddTaskScreen -> {
                             val action =
                                 OrderListFragmentDirections.actionOrdersFragmentToAddEditTaskFragment(
-                                    "New Order",
+                                    "Place New Order",
                                     null
                                 )
                             findNavController().navigate(action)
@@ -128,7 +141,7 @@ class OrderListFragment :  BaseFragment<OrderListViewModel>(), OnItemClickListen
                         is OrderListViewModel.OrdersEvent.NavigateToEditTaskScreen -> {
                             val action =
                                 OrderListFragmentDirections.actionOrdersFragmentToAddEditTaskFragment(
-                                    "Edit Order",
+                                    "View Order Details",
                                     event.order
                                 )
                             findNavController().navigate(action)
@@ -145,6 +158,7 @@ class OrderListFragment :  BaseFragment<OrderListViewModel>(), OnItemClickListen
         }
         setHasOptionsMenu(true)
         (requireActivity() as MainActivity).showFAB()
+        (requireActivity() as MainActivity).updateFABCart()
     }
 
 
@@ -165,7 +179,7 @@ class OrderListFragment :  BaseFragment<OrderListViewModel>(), OnItemClickListen
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            menu.findItem(R.id.action_hide_completed_tasks).isChecked =
+            menu.findItem(R.id.action_tax_included).isChecked =
                 viewModel.preferencesFlow.first().taxIncluded
         }
     }
@@ -176,24 +190,31 @@ class OrderListFragment :  BaseFragment<OrderListViewModel>(), OnItemClickListen
                 viewModel.onSortOrderSelected(SortOrder.BY_ORDER_NO)
                 true
             }
-            R.id.action_sort_by_due_date -> {
+            R.id.action_sort_by_date -> {
                 viewModel.onSortOrderSelected(SortOrder.BY_DATE)
                 true
             }
-            R.id.action_sort_by_priority -> {
-                viewModel.onSortOrderSelected(SortOrder.BY_ORDER_NO)
-                true
-            }
-            R.id.action_hide_completed_tasks -> {
+            R.id.action_tax_included -> {
                 item.isChecked = !item.isChecked
                 viewModel.onHideCompletedClick(item.isChecked)
                 true
             }
-            R.id.action_delete_all_completed_tasks -> {
+            R.id.action_printer -> {
                 viewModel.onDeleteAllCompletedClick()
                 true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if(sharedViewModel.shoppingCart.value?.getCartItems()!!.isEmpty()){
+            (requireActivity() as MainActivity).updateFABCart()
+            binding.layoutViewCart.gone()
+        } else {
+            (requireActivity() as MainActivity).updateFABCartDetails()
+            binding.layoutViewCart.visible()
         }
     }
 
@@ -212,10 +233,10 @@ class OrderListFragment :  BaseFragment<OrderListViewModel>(), OnItemClickListen
         viewModel.onTaskSwiped(order)
     }
 
-    override fun onItemEditClick(order: Order) {
+    override fun onItemViewClick(order: Order) {
         val action =
             OrderListFragmentDirections.actionOrdersFragmentToAddEditTaskFragment(
-                "Edit Orders",
+                "View Orders Details",
                 order
             )
         findNavController().navigate(action)

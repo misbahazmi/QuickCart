@@ -5,6 +5,14 @@ import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
 import java.util.Locale
 
+/**
+ * @author: Mohammad Misbah
+ * @since: 17-Dec-2023
+ * @sample: Technology Assessment for Sr. Android Role
+ * Email Id: mohammadmisbahazmi@gmail.com
+ * GitHub: https://github.com/misbahazmi
+ * Expertise: Android||Java/Kotlin||Flutter
+ */
 class ShoppingCart(private val taxRate: Double = 0.05) { // Tax rate set to 5% by default
     private val cartItems: MutableMap<Product, Int> = mutableMapOf()
 
@@ -46,6 +54,14 @@ class ShoppingCart(private val taxRate: Double = 0.05) { // Tax rate set to 5% b
 
     fun getTotalPrice(): Double {
         return getSubtotal() + getTaxAmount()
+    }
+
+    fun getTaxPriceFormatted(): String {
+        return DecimalFormat( "AED #0.00" ,  DecimalFormatSymbols( Locale.ENGLISH)).format( getTaxAmount() )
+    }
+
+    fun getSubTotalPriceFormatted(): String {
+        return DecimalFormat( "AED #0.00" ,  DecimalFormatSymbols( Locale.ENGLISH)).format( getSubtotal() )
     }
 
     fun getTotalPriceFormatted(): String {

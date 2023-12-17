@@ -18,7 +18,16 @@ Clean MVVM - DI
 - Storage - Datastore & Room
 
 # Common Functionality 
-
+- Add product (Saved in DB)
+    Fields:
+        Name
+        Price
+- Add product to cart
+- Orders Screen
+- Ability to view past orders
+- Setting Screen
+  - Ability to toggle tax inclusive or exclusive.
+  - You can get the tax formula from the internet.
 
 # Screenshots
 

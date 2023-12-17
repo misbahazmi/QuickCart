@@ -4,9 +4,13 @@ package com.misbah.quickcart.core.data.model
 import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.google.gson.Gson
 import com.nytimes.utils.AppEnums
 import kotlinx.parcelize.Parcelize
 import java.text.DateFormat
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Locale
 
 /**
  * @author: Mohammad Misbah
@@ -19,12 +23,12 @@ import java.text.DateFormat
 @Entity(tableName = "order_table")
 @Parcelize
 data class Order(
-    val carts: String,
-    val amount: Double,
-    val discountAmount:  Double,
-    val taxAmount:  Double,
-    val status:  Int = AppEnums.TasksPriority.Normal.value,
-    val taxIncluded: Boolean = false,
+    var carts: String,
+    var amount: Double,
+    var taxAmount: Double,
+    var totalAmout: Double,
+    var status: Int = AppEnums.TasksPriority.Normal.value,
+    var taxIncluded: Boolean = false,
     val created: Long = System.currentTimeMillis(),
     @PrimaryKey(autoGenerate = true) val id: Long = 0
 ) : Parcelable {
@@ -44,4 +48,17 @@ data class Order(
             AppEnums.TasksPriority.Normal.name
 
     }
+
+    fun getAmountFormatted(amount  : Double): String {
+        return DecimalFormat( "AED #0.00" ,  DecimalFormatSymbols( Locale.ENGLISH)).format( amount)
+    }
+
+    fun getCartList() : ArrayList<CartItem>{
+        return Gson().fromJson(carts, Array<CartItem>::class.java).toList() as ArrayList<CartItem>
+    }
+
+    fun toCartLisString(list : ArrayList<CartItem>) : String{
+        return Gson().toJson(list)
+    }
+
 }

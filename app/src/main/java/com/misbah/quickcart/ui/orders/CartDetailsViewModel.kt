@@ -31,36 +31,15 @@ class CartDetailsViewModel @Inject constructor(
 
     var order = MutableLiveData<Order>()
 
-    var selectedDateTime = order.value?.created ?: System.currentTimeMillis()
-    var taskTitle = order.value?.carts ?: ""
-    var taskDescription = order.value?.carts ?: ""
-    var taskImportance = order.value?.status ?: 0
-    var tasksCategory = order.value?.status ?: 0
-
-    var dueDate = selectedDateTime
-
 
     private val addEditTaskEventChannel = Channel<AddEditTaskEvent>()
     val addEditTaskEvent = addEditTaskEventChannel.receiveAsFlow()
 
-    fun onSaveClick() {
-        if (taskTitle.isBlank()) {
-            showInvalidInputMessage("Title cannot be empty")
-            return
-        }
-        if (taskDescription.isBlank()) {
-            showInvalidInputMessage("Description cannot be empty")
-            return
-        }
+    fun onPlaceOrderClick() {
         if (order.value != null) {
-            //val updatedTask =  order.value!!.copy(name = taskDescription, title = taskTitle , important = taskImportance, category = tasksCategory, due = dueDate)
-            //updateTask(updatedTask)
-        } else {
-            //val newProduct = Product(name = taskDescription, title = taskTitle, important = taskImportance, category = tasksCategory, due = dueDate)
-           // createTask(newProduct)
+           createOrder(order.value!!)
         }
     }
-
 
     fun showDatePicker(){
         showDateTimePicker()
@@ -70,9 +49,9 @@ class CartDetailsViewModel @Inject constructor(
         dateTimeWithResult(result)
     }
 
-    private fun createTask(product: Product) =  CoroutineScope(Dispatchers.IO).launch {
-        //quickCartDao.insert(product)
-        addEditTaskEventChannel.send(AddEditTaskEvent.NavigateBackWithResult(ADD_RESULT_OK))
+    private fun createOrder(order : Order) =  CoroutineScope(Dispatchers.IO).launch {
+        quickCartDao.insertOrder(order)
+        addEditTaskEventChannel.send(AddEditTaskEvent.NavigateBackWithResult(EDIT_TASK_RESULT_OK))
     }
 
     private fun updateTask(product: Product) =  CoroutineScope(Dispatchers.IO).launch {

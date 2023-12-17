@@ -56,7 +56,7 @@ class OrderListViewModel
     }.flatMapLatest { (query, filterPreferences) ->
         quickCartDao.getOrders(filterPreferences.taxIncluded)
     }
-    val tasks = tasksFlow.asLiveData()
+    val orders = tasksFlow.asLiveData()
 
     var remainingTasks: LiveData<List<Product>>? = null
 
@@ -101,8 +101,8 @@ class OrderListViewModel
 
     fun onAddEditResult(result: Int) {
         when (result) {
-            ADD_RESULT_OK -> showTaskSavedConfirmationMessage("Task added")
-            EDIT_TASK_RESULT_OK -> showTaskSavedConfirmationMessage("Task updated")
+            ADD_RESULT_OK -> showTaskSavedConfirmationMessage("New Order Placed")
+            EDIT_TASK_RESULT_OK -> showTaskSavedConfirmationMessage("Order Details Updated")
         }
     }
 
