@@ -1,12 +1,14 @@
 # QuickCart App (Android)
-QuickCart List - A simple QuickCart list app that allows users to add, delete and mark tasks as completed.
+QuickCart List - A simple QuickCart list app that allows users to add products, create carts & place orders.
 
 # Code Structure 
+<img width="376" alt="Screen Shot 2023-12-18 at 2 57 41 AM" src="https://github.com/misbahazmi/QuickCart-Android/assets/8206573/c035a120-3eed-4a58-9d94-10dcd09de99d">
 
 # Architecture 
 Clean MVVM - DI
 
 # Output - APK File
+[APK File Link](https://github.com/misbahazmi/QuickCart-Android/blob/master/output/quick-cart-app-V1.0.0.apk)
 
 # Important Libs 
 - Dagger2
