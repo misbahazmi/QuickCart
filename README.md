@@ -30,6 +30,8 @@ Clean MVVM - DI
   - You can get the tax formula from the internet.
 
 # Screenshots
+![image](https://github.com/misbahazmi/QuickCart-Android/assets/8206573/eef9578e-9e52-42dd-8bc2-18134e82de9a)
+
 
 
 
